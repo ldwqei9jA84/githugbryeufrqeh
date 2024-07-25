@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .container {
+            width: 80%;
+            max-width: 800px;
+            background: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            margin: 20px 0;
+        }
+        .container h2 {
+            margin-bottom: 20px;
+        }
+        .request {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px;
+            border-bottom: 1px solid #ccc;
+        }
+        .request:last-child {
+            border-bottom: none;
+        }
+        .request span {
+            flex-grow: 1;
+        }
+        .request button {
+            margin-left: 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .approve {
+            background-color: #28a745;
+            color: white;
+        }
+        .reject {
+            background-color: #dc3545;
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Заявки на добавление персонажей</h2>
+        <div id="requestsContainer"></div>
+    </div>
+    <script>
+        function loadRequests() {
+            const requestsContainer = document.getElementById('requestsContainer');
+            const requests = JSON.parse(localStorage.getItem('characterRequests')) || [];
+
+            requestsContainer.innerHTML = '';
+
+            requests.forEach((request, index) => {
+                const requestElement = document.createElement('div');
+                requestElement.className = 'request';
+                requestElement.innerHTML = `
+                    <span>ID: ${request.id}, Ник: ${request.nickname}</span>
+                    <button class="approve" onclick="approveRequest(${index}, '${request.id}', '${request.nickname}')">Принять</button>
+                    <button class="reject" onclick="rejectRequest(${index})">Отклонить</button>
+                `;
+                requestsContainer.appendChild(requestElement);
+            });
+        }
+
+        function approveRequest(index, id, nickname) {
+            const requests = JSON.parse(localStorage.getItem('characterRequests')) || [];
+            requests.splice(index, 1); // Удалить заявку после одобрения
+            localStorage.setItem('characterRequests', JSON.stringify(requests));
+
+            // Добавить персонажа на главную страницу пользователя
+            let userCharacters = JSON.parse(localStorage.getItem('userCharacters')) || [];
+            userCharacters.push({ id: id, nickname: nickname });
+            localStorage.setItem('userCharacters', JSON.stringify(userCharacters));
+
+            loadRequests();
+        }
+
+        function rejectRequest(index) {
+            const requests = JSON.parse(localStorage.getItem('characterRequests')) || [];
+            requests.splice(index, 1); // Удалить заявку после отклонения
+            localStorage.setItem('characterRequests', JSON.stringify(requests));
+            loadRequests();
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            loadRequests();
+        });
+    </script>
+</body>
+</html>
